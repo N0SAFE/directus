@@ -251,15 +251,8 @@ export class BaseMCPResourceHandler extends BaseMCPHandler implements IMCPResour
 	}
 }
 
-// Type for mapping resource URIs to handler methods
-export type ResourceMethodMap = {
-  [uri: string]: () => Promise<any>;
-};
-
 // Abstract decorator class for MCPResourceHandler
-export abstract class MCPResourceHandlerDecorator<
-  TResourceMethods extends ResourceMethodMap = ResourceMethodMap
-> extends BaseMCPResourceHandler implements IMCPResourceHandler {
+export abstract class MCPResourceHandlerDecorator extends BaseMCPResourceHandler implements IMCPResourceHandler {
 	constructor(
 		protected wrappedHandler: IMCPResourceHandler,
 		resources: Resource[] = [],
@@ -281,12 +274,13 @@ export abstract class MCPResourceHandlerDecorator<
 	public override async handleResourceCall(uri: string): Promise<any> {
 		// First check if this decorator has the resource
 		const hasResource = this.resources.some(r => 'uri' in r && r.uri === uri);
+		const name = this.resources.find(r => 'uri' in r && r.uri === uri)?.name;
 		
 		if (hasResource) {
 			// Check if there's a matching method on this class
 			// Convert URI to a valid method name
-			const methodName = uri.replace(/[^\w]/g, '_') as keyof TResourceMethods;
-			const method = (this as any)[methodName] as (() => Promise<any>);
+			const methodName = name?.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase() as keyof this;
+			const method = this[methodName];
 			
 			if (typeof method === 'function') {
 				return method.call(this);

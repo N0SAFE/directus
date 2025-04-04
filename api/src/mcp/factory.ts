@@ -17,7 +17,17 @@ import { RoleToolsDecorator } from './tools/roles.js';
 import { PermissionToolsDecorator } from './tools/permissions.js';
 import { MailToolsDecorator } from './tools/mail.js';
 import { FolderToolsDecorator } from './tools/folders.js';
-import { ResourceDecorator } from './resources/resources.js';
+import { AccessControlResourceDecorator } from './resources/access-control.js';
+import { CollectionResourceDecorator } from './resources/collection.js';
+import { FileResourceDecorator } from './resources/file.js';
+import { ItemResourceDecorator } from './resources/item.js';
+import { MailResourceDecorator } from './resources/mail.js';
+import { OverviewResourceDecorator } from './resources/overview.js';
+import { QueryResourceDecorator } from './resources/query.js';
+import { UserRoleResourceDecorator } from './resources/user-role.js';
+import { RelationalDataResourceDecorator } from './resources/relational-data.js';
+import { ErrorHandlingResourceDecorator } from './resources/error-handling.js';
+import { DataModelResourceDecorator } from './resources/data-model.js';
 
 /**
  * Concrete implementation of the base handler 
@@ -116,7 +126,17 @@ export class CoreMCPResourceHandler extends BaseMCPResourceHandler {
 export function createFullyDecoratedResourceHandler(accountability: Accountability, schema: SchemaOverview): IMCPResourceHandler {
   // Create the base handler and decorate it with all available resource decorators
   return new CoreMCPResourceHandler(accountability, schema).decorate([
-    ResourceDecorator
+    OverviewResourceDecorator,
+    CollectionResourceDecorator,
+    ItemResourceDecorator,
+    UserRoleResourceDecorator,
+    FileResourceDecorator,
+    MailResourceDecorator,
+    AccessControlResourceDecorator,
+    QueryResourceDecorator,
+    RelationalDataResourceDecorator,
+    ErrorHandlingResourceDecorator,
+    DataModelResourceDecorator
   ]);
 }
 
@@ -127,9 +147,29 @@ export function createCustomResourceHandler(
   accountability: Accountability, 
   schema: SchemaOverview,
   options: {
-    useResources?: boolean;
+    useOverview?: boolean;
+    useCollections?: boolean;
+    useItems?: boolean;
+    useUserRole?: boolean;
+    useFiles?: boolean;
+    useMail?: boolean;
+    useAccessControl?: boolean;
+    useQueries?: boolean;
+    useRelationalData?: boolean;
+    useErrorHandling?: boolean;
+    useDataModel?: boolean;
   } = {
-    useResources: true
+    useOverview: true,
+    useCollections: true,
+    useItems: true,
+    useUserRole: true,
+    useFiles: true,
+    useMail: true,
+    useAccessControl: true,
+    useQueries: true,
+    useRelationalData: true,
+    useErrorHandling: true,
+    useDataModel: true
   }
 ): IMCPResourceHandler {
   // Create the base handler
@@ -137,7 +177,17 @@ export function createCustomResourceHandler(
   const decorators: ResourceDecoratorConstructor[] = [];
   
   // Add decorators based on options
-  if (options.useResources) decorators.push(ResourceDecorator);
+  if (options.useOverview) decorators.push(OverviewResourceDecorator);
+  if (options.useCollections) decorators.push(CollectionResourceDecorator);
+  if (options.useItems) decorators.push(ItemResourceDecorator);
+  if (options.useUserRole) decorators.push(UserRoleResourceDecorator);
+  if (options.useFiles) decorators.push(FileResourceDecorator);
+  if (options.useMail) decorators.push(MailResourceDecorator);
+  if (options.useAccessControl) decorators.push(AccessControlResourceDecorator);
+  if (options.useQueries) decorators.push(QueryResourceDecorator);
+  if (options.useRelationalData) decorators.push(RelationalDataResourceDecorator);
+  if (options.useErrorHandling) decorators.push(ErrorHandlingResourceDecorator);
+  if (options.useDataModel) decorators.push(DataModelResourceDecorator);
   
   // Apply all selected decorators at once
   return handler.decorate(decorators);
