@@ -1,7 +1,7 @@
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { ItemsService } from '../../services/items.js';
 import { useLogger } from '../../logger/index.js';
-import { type IMCPToolHandler, MCPToolHandlerDecorator, MCPResponseUtils } from '../base.js';
+import { type IMCPToolHandler, MCPToolHandlerDecorator, MCPResponseUtils, type ToolMethodMap } from '../base.js';
 import type { Query } from "@directus/types";
 
 const logger = useLogger();
@@ -74,10 +74,49 @@ const ITEM_TOOLS: Tool[] = [
   },
 ];
 
+// Define params types for better type safety
+type ReadItemsParams = {
+  collection: string, 
+  limit?: number, 
+  offset?: number, 
+  filter?: any, 
+  sort?: string 
+};
+
+type ReadItemParams = {
+  collection: string,
+  id: string
+};
+
+type CreateItemParams = {
+  collection: string,
+  data: any
+};
+
+type UpdateItemParams = {
+  collection: string,
+  id: string,
+  data: any
+};
+
+type DeleteItemParams = {
+  collection: string,
+  id: string
+};
+
+// Define the tool method map for items
+interface ItemToolMethods extends ToolMethodMap {
+  read_items: (params: ReadItemsParams) => Promise<any>;
+  read_item: (params: ReadItemParams) => Promise<any>;
+  create_item: (params: CreateItemParams) => Promise<any>;
+  update_item: (params: UpdateItemParams) => Promise<any>;
+  delete_item: (params: DeleteItemParams) => Promise<any>;
+}
+
 // Decorator for item operations
-export class ItemToolsDecorator extends MCPToolHandlerDecorator {
+export class ItemToolsDecorator extends MCPToolHandlerDecorator<ItemToolMethods> {
   constructor(handler: IMCPToolHandler) {
-    super(handler);
+    super(handler, ITEM_TOOLS);
   }
 
   public override getTools(): Tool[] {
@@ -85,38 +124,8 @@ export class ItemToolsDecorator extends MCPToolHandlerDecorator {
     return [...ITEM_TOOLS, ...super.getTools()];
   }
 
-  public override async handleToolCall(toolName: string, params: unknown): Promise<any> {
-    // Handle item-specific tools
-    switch (toolName) {
-      case "read_items":
-        return this.readItems(params as { 
-          collection: string, 
-          limit?: number, 
-          offset?: number, 
-          filter?: any, 
-          sort?: string 
-        });
-      case "read_item":
-        return this.readItem(params as { collection: string, id: string });
-      case "create_item":
-        return this.createItem(params as { collection: string, data: any });
-      case "update_item":
-        return this.updateItem(params as { collection: string, id: string, data: any });
-      case "delete_item":
-        return this.deleteItem(params as { collection: string, id: string });
-      default:
-        // For other tools, delegate to the wrapped handler
-        return super.handleToolCall(toolName, params);
-    }
-  }
-
-  private async readItems(params: { 
-    collection: string, 
-    limit?: number, 
-    offset?: number, 
-    filter?: any, 
-    sort?: string 
-  }) {
+  // Tool methods with the same name as the tool will be automatically called by the decorator
+  async read_items(params: ReadItemsParams) {
     try {
       const itemsService = new ItemsService(params.collection, {
         accountability: this.wrappedHandler.getAccountability(),
@@ -137,11 +146,12 @@ export class ItemToolsDecorator extends MCPToolHandlerDecorator {
       } else {
         logger.error(`Error reading items from ${params.collection}: ${String(error)}`);
       }
+      
       return MCPResponseUtils.handleError(error, `Error reading items from ${params.collection}`);
     }
   }
 
-  private async readItem(params: { collection: string, id: string }) {
+  async read_item(params: ReadItemParams) {
     try {
       const itemsService = new ItemsService(params.collection, {
         accountability: this.wrappedHandler.getAccountability(),
@@ -156,11 +166,12 @@ export class ItemToolsDecorator extends MCPToolHandlerDecorator {
       } else {
         logger.error(`Error reading item ${params.id} from ${params.collection}: ${String(error)}`);
       }
+      
       return MCPResponseUtils.handleError(error, `Error reading item ${params.id} from ${params.collection}`);
     }
   }
 
-  private async createItem(params: { collection: string, data: any }) {
+  async create_item(params: CreateItemParams) {
     try {
       const itemsService = new ItemsService(params.collection, {
         accountability: this.wrappedHandler.getAccountability(),
@@ -177,11 +188,12 @@ export class ItemToolsDecorator extends MCPToolHandlerDecorator {
       } else {
         logger.error(`Error creating item in ${params.collection}: ${String(error)}`);
       }
+      
       return MCPResponseUtils.handleError(error, `Error creating item in ${params.collection}`);
     }
   }
 
-  private async updateItem(params: { collection: string, id: string, data: any }) {
+  async update_item(params: UpdateItemParams) {
     try {
       const itemsService = new ItemsService(params.collection, {
         accountability: this.wrappedHandler.getAccountability(),
@@ -198,11 +210,12 @@ export class ItemToolsDecorator extends MCPToolHandlerDecorator {
       } else {
         logger.error(`Error updating item ${params.id} in ${params.collection}: ${String(error)}`);
       }
+      
       return MCPResponseUtils.handleError(error, `Error updating item ${params.id} in ${params.collection}`);
     }
   }
 
-  private async deleteItem(params: { collection: string, id: string }) {
+  async delete_item(params: DeleteItemParams) {
     try {
       const itemsService = new ItemsService(params.collection, {
         accountability: this.wrappedHandler.getAccountability(),
@@ -223,6 +236,7 @@ export class ItemToolsDecorator extends MCPToolHandlerDecorator {
       } else {
         logger.error(`Error deleting item ${params.id} from ${params.collection}: ${String(error)}`);
       }
+      
       return MCPResponseUtils.handleError(error, `Error deleting item ${params.id} from ${params.collection}`);
     }
   }

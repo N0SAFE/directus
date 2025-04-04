@@ -1,7 +1,7 @@
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { RolesService } from '../../services/roles.js';
 import { useLogger } from '../../logger/index.js';
-import { type IMCPToolHandler, MCPToolHandlerDecorator, MCPResponseUtils } from '../base.js';
+import { type IMCPToolHandler, MCPToolHandlerDecorator, MCPResponseUtils, type ToolMethodMap } from '../base.js';
 import type { Query } from '@directus/types';
 
 const logger = useLogger();
@@ -71,34 +71,52 @@ const ROLE_TOOLS: Tool[] = [
 	},
 ];
 
+// Define params types for better type safety
+type GetRolesParams = { 
+	filter?: any; 
+	limit?: number; 
+	offset?: number; 
+	sort?: string[] 
+};
+
+type GetRoleParams = { 
+	id: string 
+};
+
+type CreateRoleParams = { 
+	data: any 
+};
+
+type UpdateRoleParams = { 
+	id: string; 
+	data: any 
+};
+
+type DeleteRoleParams = { 
+	id: string 
+};
+
+// Define the tool method map for roles
+interface RoleToolMethods extends ToolMethodMap {
+	get_roles: (params: GetRolesParams) => Promise<any>;
+	get_role: (params: GetRoleParams) => Promise<any>;
+	create_role: (params: CreateRoleParams) => Promise<any>;
+	update_role: (params: UpdateRoleParams) => Promise<any>;
+	delete_role: (params: DeleteRoleParams) => Promise<any>;
+}
+
 // Decorator for role operations
-export class RoleToolsDecorator extends MCPToolHandlerDecorator {
+export class RoleToolsDecorator extends MCPToolHandlerDecorator<RoleToolMethods> {
 	constructor(handler: IMCPToolHandler) {
-		super(handler);
+		super(handler, ROLE_TOOLS);
 	}
 
 	public override getTools(): Tool[] {
 		return [...ROLE_TOOLS, ...super.getTools()];
 	}
 
-	public override async handleToolCall(toolName: string, params: unknown): Promise<any> {
-		switch (toolName) {
-			case 'get_roles':
-				return this.getRoles(params as { filter?: any; limit?: number; offset?: number; sort?: string[] });
-			case 'get_role':
-				return this.getRole(params as { id: string });
-			case 'create_role':
-				return this.createRole(params as { data: any });
-			case 'update_role':
-				return this.updateRole(params as { id: string; data: any });
-			case 'delete_role':
-				return this.deleteRole(params as { id: string });
-			default:
-				return super.handleToolCall(toolName, params);
-		}
-	}
-
-	private async getRoles(params: { filter?: any; limit?: number; offset?: number; sort?: string[] } = {}) {
+	// Tool methods with the same name as the tool will be automatically called by the decorator
+	async get_roles(params: GetRolesParams = {}) {
 		try {
 			const rolesService = new RolesService({
 				accountability: this.wrappedHandler.getAccountability(),
@@ -119,11 +137,12 @@ export class RoleToolsDecorator extends MCPToolHandlerDecorator {
 			} else {
 				logger.error(`Error fetching roles: ${String(error)}`);
 			}
+			
 			return MCPResponseUtils.handleError(error, 'Error fetching roles');
 		}
 	}
 
-	private async getRole(params: { id: string }) {
+	async get_role(params: GetRoleParams) {
 		try {
 			const rolesService = new RolesService({
 				accountability: this.wrappedHandler.getAccountability(),
@@ -138,11 +157,12 @@ export class RoleToolsDecorator extends MCPToolHandlerDecorator {
 			} else {
 				logger.error(`Error fetching role ${params.id}: ${String(error)}`);
 			}
+			
 			return MCPResponseUtils.handleError(error, `Error fetching role ${params.id}`);
 		}
 	}
 
-	private async createRole(params: { data: any }) {
+	async create_role(params: CreateRoleParams) {
 		try {
 			const rolesService = new RolesService({
 				accountability: this.wrappedHandler.getAccountability(),
@@ -159,11 +179,12 @@ export class RoleToolsDecorator extends MCPToolHandlerDecorator {
 			} else {
 				logger.error(`Error creating role: ${String(error)}`);
 			}
+			
 			return MCPResponseUtils.handleError(error, 'Error creating role');
 		}
 	}
 
-	private async updateRole(params: { id: string; data: any }) {
+	async update_role(params: UpdateRoleParams) {
 		try {
 			const rolesService = new RolesService({
 				accountability: this.wrappedHandler.getAccountability(),
@@ -180,11 +201,12 @@ export class RoleToolsDecorator extends MCPToolHandlerDecorator {
 			} else {
 				logger.error(`Error updating role ${params.id}: ${String(error)}`);
 			}
+			
 			return MCPResponseUtils.handleError(error, `Error updating role ${params.id}`);
 		}
 	}
 
-	private async deleteRole(params: { id: string }) {
+	async delete_role(params: DeleteRoleParams) {
 		try {
 			const rolesService = new RolesService({
 				accountability: this.wrappedHandler.getAccountability(),
@@ -207,6 +229,7 @@ export class RoleToolsDecorator extends MCPToolHandlerDecorator {
 			} else {
 				logger.error(`Error deleting role ${params.id}: ${String(error)}`);
 			}
+			
 			return MCPResponseUtils.handleError(error, `Error deleting role ${params.id}`);
 		}
 	}

@@ -1,7 +1,7 @@
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { FieldsService } from '../../services/fields.js';
 import { useLogger } from '../../logger/index.js';
-import { type IMCPToolHandler, MCPToolHandlerDecorator, MCPResponseUtils } from '../base.js';
+import { type IMCPToolHandler, MCPToolHandlerDecorator, MCPResponseUtils, type ToolMethodMap } from '../base.js';
 
 const logger = useLogger();
 
@@ -69,34 +69,53 @@ const FIELD_TOOLS: Tool[] = [
   },
 ];
 
+// Define params types for better type safety
+type GetFieldsParams = {
+  collection: string
+};
+
+type GetFieldParams = {
+  collection: string,
+  field: string
+};
+
+type CreateFieldParams = {
+  collection: string,
+  field: any
+};
+
+type UpdateFieldParams = {
+  collection: string,
+  field: string,
+  data: any
+};
+
+type DeleteFieldParams = {
+  collection: string,
+  field: string
+};
+
+// Define the tool method map for fields
+interface FieldToolMethods extends ToolMethodMap {
+  get_fields: (params: GetFieldsParams) => Promise<any>;
+  get_field: (params: GetFieldParams) => Promise<any>;
+  create_field: (params: CreateFieldParams) => Promise<any>;
+  update_field: (params: UpdateFieldParams) => Promise<any>;
+  delete_field: (params: DeleteFieldParams) => Promise<any>;
+}
+
 // Decorator for field operations
-export class FieldToolsDecorator extends MCPToolHandlerDecorator {
+export class FieldToolsDecorator extends MCPToolHandlerDecorator<FieldToolMethods> {
   constructor(handler: IMCPToolHandler) {
-    super(handler);
+    super(handler, FIELD_TOOLS);
   }
 
   public override getTools(): Tool[] {
     return [...FIELD_TOOLS, ...super.getTools()];
   }
 
-  public override async handleToolCall(toolName: string, params: unknown): Promise<any> {
-    switch (toolName) {
-      case "get_fields":
-        return this.getFields(params as { collection: string });
-      case "get_field":
-        return this.getField(params as { collection: string, field: string });
-      case "create_field":
-        return this.createField(params as { collection: string, field: any });
-      case "update_field":
-        return this.updateField(params as { collection: string, field: string, data: any });
-      case "delete_field":
-        return this.deleteField(params as { collection: string, field: string });
-      default:
-        return super.handleToolCall(toolName, params);
-    }
-  }
-
-  private async getFields(params: { collection: string }) {
+  // Tool methods with the same name as the tool will be automatically called by the decorator
+  async get_fields(params: GetFieldsParams) {
     try {
       const fieldsService = new FieldsService({
         accountability: this.wrappedHandler.getAccountability(),
@@ -111,11 +130,12 @@ export class FieldToolsDecorator extends MCPToolHandlerDecorator {
       } else {
         logger.error(`Error fetching fields for collection ${params.collection}: ${String(error)}`);
       }
+      
       return MCPResponseUtils.handleError(error, `Error fetching fields for collection ${params.collection}`);
     }
   }
 
-  private async getField(params: { collection: string, field: string }) {
+  async get_field(params: GetFieldParams) {
     try {
       const fieldsService = new FieldsService({
         accountability: this.wrappedHandler.getAccountability(),
@@ -130,6 +150,7 @@ export class FieldToolsDecorator extends MCPToolHandlerDecorator {
       } else {
         logger.error(`Error fetching field ${params.field} in collection ${params.collection}: ${String(error)}`);
       }
+      
       return MCPResponseUtils.handleError(
         error, 
         `Error fetching field ${params.field} in collection ${params.collection}`
@@ -137,7 +158,7 @@ export class FieldToolsDecorator extends MCPToolHandlerDecorator {
     }
   }
 
-  private async createField(params: { collection: string, field: any }) {
+  async create_field(params: CreateFieldParams) {
     try {
       const fieldsService = new FieldsService({
         accountability: this.wrappedHandler.getAccountability(),
@@ -152,11 +173,12 @@ export class FieldToolsDecorator extends MCPToolHandlerDecorator {
       } else {
         logger.error(`Error creating field in collection ${params.collection}: ${String(error)}`);
       }
+      
       return MCPResponseUtils.handleError(error, `Error creating field in collection ${params.collection}`);
     }
   }
 
-  private async updateField(params: { collection: string, field: string, data: any }) {
+  async update_field(params: UpdateFieldParams) {
     try {
       const fieldsService = new FieldsService({
         accountability: this.wrappedHandler.getAccountability(),
@@ -171,6 +193,7 @@ export class FieldToolsDecorator extends MCPToolHandlerDecorator {
       } else {
         logger.error(`Error updating field ${params.field} in collection ${params.collection}: ${String(error)}`);
       }
+      
       return MCPResponseUtils.handleError(
         error, 
         `Error updating field ${params.field} in collection ${params.collection}`
@@ -178,7 +201,7 @@ export class FieldToolsDecorator extends MCPToolHandlerDecorator {
     }
   }
 
-  private async deleteField(params: { collection: string, field: string }) {
+  async delete_field(params: DeleteFieldParams) {
     try {
       const fieldsService = new FieldsService({
         accountability: this.wrappedHandler.getAccountability(),
@@ -198,6 +221,7 @@ export class FieldToolsDecorator extends MCPToolHandlerDecorator {
       } else {
         logger.error(`Error deleting field ${params.field} from collection ${params.collection}: ${String(error)}`);
       }
+      
       return MCPResponseUtils.handleError(
         error, 
         `Error deleting field ${params.field} from collection ${params.collection}`

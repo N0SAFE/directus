@@ -1,7 +1,7 @@
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { FoldersService } from '../../services/folders.js';
 import { useLogger } from '../../logger/index.js';
-import { type IMCPToolHandler, MCPToolHandlerDecorator, MCPResponseUtils } from '../base.js';
+import { type IMCPToolHandler, MCPToolHandlerDecorator, MCPResponseUtils, type ToolMethodMap } from '../base.js';
 import type { Query } from "@directus/types";
 
 const logger = useLogger();
@@ -69,34 +69,53 @@ const FOLDER_TOOLS: Tool[] = [
   },
 ];
 
+// Define params types for better type safety
+type GetFoldersParams = {
+  filter?: any, 
+  limit?: number, 
+  offset?: number, 
+  sort?: string[]
+};
+
+type GetFolderParams = {
+  id: string
+};
+
+type CreateFolderParams = {
+  name: string, 
+  parent?: string
+};
+
+type UpdateFolderParams = {
+  id: string, 
+  data: any
+};
+
+type DeleteFolderParams = {
+  id: string
+};
+
+// Define the tool method map for folders
+interface FolderToolMethods extends ToolMethodMap {
+  get_folders: (params: GetFoldersParams) => Promise<any>;
+  get_folder: (params: GetFolderParams) => Promise<any>;
+  create_folder: (params: CreateFolderParams) => Promise<any>;
+  update_folder: (params: UpdateFolderParams) => Promise<any>;
+  delete_folder: (params: DeleteFolderParams) => Promise<any>;
+}
+
 // Decorator for folder operations
-export class FolderToolsDecorator extends MCPToolHandlerDecorator {
+export class FolderToolsDecorator extends MCPToolHandlerDecorator<FolderToolMethods> {
   constructor(handler: IMCPToolHandler) {
-    super(handler);
+    super(handler, FOLDER_TOOLS);
   }
 
   public override getTools(): Tool[] {
     return [...FOLDER_TOOLS, ...super.getTools()];
   }
 
-  public override async handleToolCall(toolName: string, params: unknown): Promise<any> {
-    switch (toolName) {
-      case "get_folders":
-        return this.getFolders(params as { filter?: any, limit?: number, offset?: number, sort?: string[] });
-      case "get_folder":
-        return this.getFolder(params as { id: string });
-      case "create_folder":
-        return this.createFolder(params as { name: string, parent?: string });
-      case "update_folder":
-        return this.updateFolder(params as { id: string, data: any });
-      case "delete_folder":
-        return this.deleteFolder(params as { id: string });
-      default:
-        return super.handleToolCall(toolName, params);
-    }
-  }
-
-  private async getFolders(params: { filter?: any, limit?: number, offset?: number, sort?: string[] } = {}) {
+  // Tool methods with the same name as the tool will be automatically called by the decorator
+  async get_folders(params: GetFoldersParams = {}) {
     try {
       const foldersService = new FoldersService({
         accountability: this.wrappedHandler.getAccountability(),
@@ -117,11 +136,12 @@ export class FolderToolsDecorator extends MCPToolHandlerDecorator {
       } else {
         logger.error(`Error fetching folders: ${JSON.stringify(error)}`);
       }
+      
       return MCPResponseUtils.handleError(error, "Error fetching folders");
     }
   }
 
-  private async getFolder(params: { id: string }) {
+  async get_folder(params: GetFolderParams) {
     try {
       const foldersService = new FoldersService({
         accountability: this.wrappedHandler.getAccountability(),
@@ -136,11 +156,12 @@ export class FolderToolsDecorator extends MCPToolHandlerDecorator {
       } else {
         logger.error(`Error fetching folder ${params.id}: ${JSON.stringify(error)}`);
       }
+      
       return MCPResponseUtils.handleError(error, `Error fetching folder ${params.id}`);
     }
   }
 
-  private async createFolder(params: { name: string, parent?: string }) {
+  async create_folder(params: CreateFolderParams) {
     try {
       const foldersService = new FoldersService({
         accountability: this.wrappedHandler.getAccountability(),
@@ -160,11 +181,12 @@ export class FolderToolsDecorator extends MCPToolHandlerDecorator {
       } else {
         logger.error(`Error creating folder: ${JSON.stringify(error)}`);
       }
+      
       return MCPResponseUtils.handleError(error, "Error creating folder");
     }
   }
 
-  private async updateFolder(params: { id: string, data: any }) {
+  async update_folder(params: UpdateFolderParams) {
     try {
       const foldersService = new FoldersService({
         accountability: this.wrappedHandler.getAccountability(),
@@ -181,11 +203,12 @@ export class FolderToolsDecorator extends MCPToolHandlerDecorator {
       } else {
         logger.error(`Error updating folder ${params.id}: ${JSON.stringify(error)}`);
       }
+      
       return MCPResponseUtils.handleError(error, `Error updating folder ${params.id}`);
     }
   }
 
-  private async deleteFolder(params: { id: string }) {
+  async delete_folder(params: DeleteFolderParams) {
     try {
       const foldersService = new FoldersService({
         accountability: this.wrappedHandler.getAccountability(),
@@ -204,8 +227,9 @@ export class FolderToolsDecorator extends MCPToolHandlerDecorator {
       if (error instanceof Error) {
         logger.error(`Error deleting folder ${params.id}: ${error.message}`);
       } else {
-        logger.error(`Error deleting folder ${params.id}: ${JSON.stringify(error)}`);
-      } 
+        logger.error(`Error deleting folder ${params.id}: ${JSON.stringify(error)}`); 
+      }
+      
       return MCPResponseUtils.handleError(error, `Error deleting folder ${params.id}`);
     }
   }

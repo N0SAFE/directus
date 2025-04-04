@@ -1,7 +1,7 @@
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { MailService } from '../../services/mail/index.js';
 import { useLogger } from '../../logger/index.js';
-import { type IMCPToolHandler, MCPToolHandlerDecorator, MCPResponseUtils } from '../base.js';
+import { type IMCPToolHandler, MCPToolHandlerDecorator, MCPResponseUtils, type ToolMethodMap } from '../base.js';
 
 const logger = useLogger();
 
@@ -86,55 +86,47 @@ const MAIL_TOOLS: Tool[] = [
 	},
 ];
 
+// Define params types for better type safety
+type SendEmailParams = {
+	to: string;
+	subject: string;
+	text?: string;
+	html?: string;
+	from?: string;
+	cc?: string;
+	bcc?: string;
+};
+
+type SendEmailWithTemplateParams = {
+	to: string;
+	subject: string;
+	template: { 
+		name: string; 
+		data: Record<string, any> 
+	};
+	from?: string;
+	cc?: string;
+	bcc?: string;
+};
+
+// Define the tool method map for mail
+interface MailToolMethods extends ToolMethodMap {
+	send_email: (params: SendEmailParams) => Promise<any>;
+	send_email_with_template: (params: SendEmailWithTemplateParams) => Promise<any>;
+}
+
 // Decorator for mail operations
-export class MailToolsDecorator extends MCPToolHandlerDecorator {
+export class MailToolsDecorator extends MCPToolHandlerDecorator<MailToolMethods> {
 	constructor(handler: IMCPToolHandler) {
-		super(handler);
+		super(handler, MAIL_TOOLS);
 	}
 
 	public override getTools(): Tool[] {
 		return [...MAIL_TOOLS, ...super.getTools()];
 	}
 
-	public override async handleToolCall(toolName: string, params: unknown): Promise<any> {
-		switch (toolName) {
-			case 'send_email':
-				return this.sendEmail(
-					params as {
-						to: string;
-						subject: string;
-						text?: string;
-						html?: string;
-						from?: string;
-						cc?: string;
-						bcc?: string;
-					},
-				);
-			case 'send_email_with_template':
-				return this.sendEmailWithTemplate(
-					params as {
-						to: string;
-						subject: string;
-						template: { name: string; data: Record<string, any> };
-						from?: string;
-						cc?: string;
-						bcc?: string;
-					},
-				);
-			default:
-				return super.handleToolCall(toolName, params);
-		}
-	}
-
-	private async sendEmail(params: {
-		to: string;
-		subject: string;
-		text?: string;
-		html?: string;
-		from?: string;
-		cc?: string;
-		bcc?: string;
-	}) {
+	// Tool methods with the same name as the tool will be automatically called by the decorator
+	async send_email(params: SendEmailParams) {
 		try {
 			if (!params.text && !params.html) {
 				return MCPResponseUtils.createErrorResponse('Either text or html content must be provided');
@@ -180,18 +172,12 @@ export class MailToolsDecorator extends MCPToolHandlerDecorator {
 			} else {
 				logger.error(`Error sending email: ${String(error)}`);
 			}
+			
 			return MCPResponseUtils.handleError(error, 'Error sending email');
 		}
 	}
 
-	private async sendEmailWithTemplate(params: {
-		to: string;
-		subject: string;
-		template: { name: string; data: Record<string, any> };
-		from?: string;
-		cc?: string;
-		bcc?: string;
-	}) {
+	async send_email_with_template(params: SendEmailWithTemplateParams) {
 		try {
 			const mailService = new MailService({
 				accountability: this.wrappedHandler.getAccountability(),
@@ -231,6 +217,7 @@ export class MailToolsDecorator extends MCPToolHandlerDecorator {
 			} else {
 				logger.error(`Error sending email with template: ${String(error)}`);
 			}
+			
 			return MCPResponseUtils.handleError(error, 'Error sending email with template');
 		}
 	}

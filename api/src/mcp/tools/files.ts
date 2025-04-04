@@ -1,7 +1,7 @@
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { FilesService } from '../../services/files.js';
 import { useLogger } from '../../logger/index.js';
-import { type IMCPToolHandler, MCPToolHandlerDecorator, MCPResponseUtils } from '../base.js';
+import { type IMCPToolHandler, MCPToolHandlerDecorator, MCPResponseUtils, type ToolMethodMap } from '../base.js';
 import type { Query } from '@directus/types';
 
 const logger = useLogger();
@@ -33,10 +33,27 @@ const FILE_TOOLS: Tool[] = [
 	},
 ];
 
+// Define params types for better type safety
+type GetFilesParams = {
+	limit?: number;
+	offset?: number;
+	filter?: any;
+};
+
+type GetFileParams = {
+	id: string;
+};
+
+// Define the tool method map for files
+interface FileToolMethods extends ToolMethodMap {
+	get_files: (params: GetFilesParams) => Promise<any>;
+	get_file: (params: GetFileParams) => Promise<any>;
+}
+
 // Decorator for file operations
-export class FileToolsDecorator extends MCPToolHandlerDecorator {
+export class FileToolsDecorator extends MCPToolHandlerDecorator<FileToolMethods> {
 	constructor(handler: IMCPToolHandler) {
-		super(handler);
+		super(handler, FILE_TOOLS);
 	}
 
 	public override getTools(): Tool[] {
@@ -44,19 +61,8 @@ export class FileToolsDecorator extends MCPToolHandlerDecorator {
 		return [...FILE_TOOLS, ...super.getTools()];
 	}
 
-	public override async handleToolCall(toolName: string, params: unknown): Promise<any> {
-		// Handle file-specific tools
-		if (toolName === 'get_files') {
-			return this.getFiles(params as { limit?: number; offset?: number; filter?: any });
-		} else if (toolName === 'get_file') {
-			return this.getFile(params as { id: string });
-		}
-
-		// For other tools, delegate to the wrapped handler
-		return super.handleToolCall(toolName, params);
-	}
-
-	private async getFiles(params: { limit?: number; offset?: number; filter?: any } = {}) {
+	// Tool methods with the same name as the tool will be automatically called by the decorator
+	async get_files(params: GetFilesParams = {}) {
 		try {
 			const filesService = new FilesService({
 				accountability: this.wrappedHandler.getAccountability(),
@@ -76,11 +82,12 @@ export class FileToolsDecorator extends MCPToolHandlerDecorator {
 			} else {
 				logger.error(`Error fetching files: ${String(error)}`);
 			}
+			
 			return MCPResponseUtils.handleError(error, 'Error fetching files');
 		}
 	}
 
-	private async getFile(params: { id: string }) {
+	async get_file(params: GetFileParams) {
 		try {
 			const filesService = new FilesService({
 				accountability: this.wrappedHandler.getAccountability(),

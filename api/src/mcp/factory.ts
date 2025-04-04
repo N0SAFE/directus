@@ -1,5 +1,13 @@
 import type { Accountability, SchemaOverview } from '@directus/types';
-import { BaseMCPResourceHandler, BaseMCPToolHandler, type IMCPResourceHandler, type IMCPToolHandler, MCPResponseUtils } from './base.js';
+import { 
+  BaseMCPResourceHandler, 
+  BaseMCPToolHandler, 
+  MCPResponseUtils, 
+  type IMCPToolHandler, 
+  type IMCPResourceHandler,
+  type ToolDecoratorConstructor,
+  type ResourceDecoratorConstructor
+} from './base.js';
 import { CollectionToolsDecorator } from './tools/collections.js';
 import { ItemToolsDecorator } from './tools/items.js';
 import { FileToolsDecorator } from './tools/files.js';
@@ -18,7 +26,6 @@ import { ResourceDecorator } from './resources/resources.js';
 export class CoreMCPToolHandler extends BaseMCPToolHandler {
   constructor(accountability: Accountability, schema: SchemaOverview) {
     super(accountability, schema, []);
-    console.log('CoreMCPToolHandler initialized', 'Class: ', this.constructor.name);
   }
 
   public override async handleToolCall(toolName: string): Promise<any> {
@@ -31,23 +38,18 @@ export class CoreMCPToolHandler extends BaseMCPToolHandler {
  * Factory to create a fully decorated MCP tool handler with all available decorators
  */
 export function createFullyDecoratedToolHandler(accountability: Accountability, schema: SchemaOverview): IMCPToolHandler {
-  // Create the base handler
-  let handler: IMCPToolHandler = new CoreMCPToolHandler(accountability, schema);
-  
-  // Apply decorators (the order matters - later decorators wrap earlier ones)
-  handler = new CollectionToolsDecorator(handler);
-  handler = new ItemToolsDecorator(handler);
-  handler = new FileToolsDecorator(handler);
-  
-  // Apply the new decorators
-  handler = new FieldToolsDecorator(handler);
-  handler = new UserToolsDecorator(handler);
-  handler = new RoleToolsDecorator(handler);
-  handler = new PermissionToolsDecorator(handler);
-  handler = new MailToolsDecorator(handler);
-  handler = new FolderToolsDecorator(handler);
-  
-  return handler;
+  // Create the base handler and decorate it with all available decorators
+  return new CoreMCPToolHandler(accountability, schema).decorate([
+    CollectionToolsDecorator,
+    ItemToolsDecorator,
+    FileToolsDecorator,
+    FieldToolsDecorator,
+    UserToolsDecorator,
+    RoleToolsDecorator,
+    PermissionToolsDecorator,
+    MailToolsDecorator,
+    FolderToolsDecorator
+  ]);
 }
 
 /**
@@ -66,7 +68,6 @@ export function createCustomToolHandler(
     usePermissions?: boolean;
     useMail?: boolean;
     useFolders?: boolean;
-    useResources?: boolean;
   } = {
     useCollections: true,
     useItems: true,
@@ -76,51 +77,26 @@ export function createCustomToolHandler(
     useRoles: true,
     usePermissions: true,
     useMail: true,
-    useFolders: true,
-    useResources: true
+    useFolders: true
   }
 ): IMCPToolHandler {
   // Create the base handler
-  let handler: IMCPToolHandler = new CoreMCPToolHandler(accountability, schema);
+  const handler = new CoreMCPToolHandler(accountability, schema);
+  const decorators: ToolDecoratorConstructor[] = [];
   
-  // Apply only selected decorators
-  if (options.useCollections) {
-    handler = new CollectionToolsDecorator(handler);
-  }
+  // Add decorators based on options
+  if (options.useCollections) decorators.push(CollectionToolsDecorator);
+  if (options.useItems) decorators.push(ItemToolsDecorator);
+  if (options.useFiles) decorators.push(FileToolsDecorator);
+  if (options.useFields) decorators.push(FieldToolsDecorator);
+  if (options.useUsers) decorators.push(UserToolsDecorator);
+  if (options.useRoles) decorators.push(RoleToolsDecorator);
+  if (options.usePermissions) decorators.push(PermissionToolsDecorator);
+  if (options.useMail) decorators.push(MailToolsDecorator);
+  if (options.useFolders) decorators.push(FolderToolsDecorator);
   
-  if (options.useItems) {
-    handler = new ItemToolsDecorator(handler);
-  }
-  
-  if (options.useFiles) {
-    handler = new FileToolsDecorator(handler);
-  }
-  
-  if (options.useFields) {
-    handler = new FieldToolsDecorator(handler);
-  }
-  
-  if (options.useUsers) {
-    handler = new UserToolsDecorator(handler);
-  }
-  
-  if (options.useRoles) {
-    handler = new RoleToolsDecorator(handler);
-  }
-  
-  if (options.usePermissions) {
-    handler = new PermissionToolsDecorator(handler);
-  }
-  
-  if (options.useMail) {
-    handler = new MailToolsDecorator(handler);
-  }
-  
-  if (options.useFolders) {
-    handler = new FolderToolsDecorator(handler);
-  }
-  
-  return handler;
+  // Apply all selected decorators at once
+  return handler.decorate(decorators);
 }
 
 export class CoreMCPResourceHandler extends BaseMCPResourceHandler {
@@ -138,13 +114,10 @@ export class CoreMCPResourceHandler extends BaseMCPResourceHandler {
  * Factory to create a fully decorated MCP resource handler with all available decorators
  */
 export function createFullyDecoratedResourceHandler(accountability: Accountability, schema: SchemaOverview): IMCPResourceHandler {
-  // Create the base handler
-  let handler: IMCPResourceHandler = new CoreMCPResourceHandler(accountability, schema);
-  
-  // Apply decorators (the order matters - later decorators wrap earlier ones)
-  handler = new ResourceDecorator(handler);
-  
-  return handler;
+  // Create the base handler and decorate it with all available resource decorators
+  return new CoreMCPResourceHandler(accountability, schema).decorate([
+    ResourceDecorator
+  ]);
 }
 
 /**
@@ -160,12 +133,12 @@ export function createCustomResourceHandler(
   }
 ): IMCPResourceHandler {
   // Create the base handler
-  let handler: IMCPResourceHandler = new CoreMCPResourceHandler(accountability, schema);
+  const handler = new CoreMCPResourceHandler(accountability, schema);
+  const decorators: ResourceDecoratorConstructor[] = [];
   
-  // Apply only selected decorators
-  if (options.useResources) {
-    handler = new ResourceDecorator(handler);
-  }
+  // Add decorators based on options
+  if (options.useResources) decorators.push(ResourceDecorator);
   
-  return handler;
+  // Apply all selected decorators at once
+  return handler.decorate(decorators);
 }

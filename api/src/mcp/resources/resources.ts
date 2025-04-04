@@ -1,12 +1,13 @@
-import { useLogger } from '../../logger/index.js';
 import {
+  BaseMCPResourceHandler,
 	MCPResourceHandlerDecorator,
 	type IMCPResourceHandler,
 	type Resource,
+	type ResourceMethodMap
 } from '../base.js';
 
 // Documentation Resources
-const MCP_RESOURCES = [
+const MCP_RESOURCES: Resource[] = [
 	// Server overview
 	{
 		uri: 'mcp://docs/overview',
@@ -220,7 +221,8 @@ Delete an item from a collection.
 	},
 
 	// Files tools
-	{uri: 'mcp://docs/tools/files',
+	{
+		uri: 'mcp://docs/tools/files',
 		mimeType: 'text/markdown',
 		name: 'Files Tools',
 		description: 'Documentation for file management tools',
@@ -267,8 +269,8 @@ Get details about a specific file.
 	},
 
 	// Fields tools
-{
-  uri: 	'mcp://docs/tools/fields',
+	{
+		uri: 'mcp://docs/tools/fields',
 		mimeType: 'text/markdown',
 		name: 'Fields Tools',
 		description: 'Documentation for field management tools',
@@ -378,7 +380,7 @@ Delete a field from a collection.
 
 	// Users tools
 	{
-    uri: 'mcp://docs/tools/users',
+		uri: 'mcp://docs/tools/users',
 		mimeType: 'text/markdown',
 		name: 'Users Tools',
 		description: 'Documentation for user management tools',
@@ -507,7 +509,7 @@ Get information about the current user.
 
 	// Roles tools
 	{
-    uri: 'mcp://docs/tools/roles',
+		uri: 'mcp://docs/tools/roles',
 		mimeType: 'text/markdown',
 		name: 'Roles Tools',
 		description: 'Documentation for role management tools',
@@ -610,7 +612,7 @@ Delete a role.
 
 	// Permissions tools
 	{
-    uri: 'mcp://docs/tools/permissions',
+		uri: 'mcp://docs/tools/permissions',
 		mimeType: 'text/markdown',
 		name: 'Permissions Tools',
 		description: 'Documentation for permission management tools',
@@ -712,7 +714,7 @@ Delete a permission.
 
 	// Mail tools
 	{
-    uri: 'mcp://docs/tools/mail',
+		uri: 'mcp://docs/tools/mail',
 		mimeType: 'text/markdown',
 		name: 'Mail Tools',
 		description: 'Documentation for email tools',
@@ -783,7 +785,7 @@ Send an email using a template.
 
 	// Folders tools
 	{
-    uri: 'mcp://docs/tools/folders',
+		uri: 'mcp://docs/tools/folders',
 		mimeType: 'text/markdown',
 		name: 'Folders Tools',
 		description: 'Documentation for folder management tools',
@@ -880,7 +882,8 @@ Delete a folder.
 	},
 
 	// Response formats
-	 {uri: 'mcp://docs/response-formats',
+	{
+		uri: 'mcp://docs/response-formats',
 		mimeType: 'text/markdown',
 		name: 'Response Formats',
 		description: 'Documentation for MCP response formats',
@@ -937,7 +940,7 @@ All errors are logged on the server for troubleshooting.
 
 	// Best practices
 	{
-    uri: 'mcp://docs/best-practices',
+		uri: 'mcp://docs/best-practices',
 		mimeType: 'text/markdown',
 		name: 'MCP Best Practices',
 		description: 'Best practices for using the Directus MCP server',
@@ -972,7 +975,7 @@ All errors are logged on the server for troubleshooting.
 
 	// Query Parameters
 	{
-    uri: 'mcp://docs/query-parameters',
+		uri: 'mcp://docs/query-parameters',
 		mimeType: 'text/markdown',
 		name: 'Query Parameters',
 		description: 'Documentation for Directus query parameters',
@@ -1151,7 +1154,7 @@ Functions accept a field and return a modified value. They can be used in field 
 
 	// Filter Rules
 	{
-    uri: 'mcp://docs/filter-rules',
+		uri: 'mcp://docs/filter-rules',
 		mimeType: 'text/markdown',
 		name: 'Filter Rules',
 		description: 'Documentation for Directus filter rules',
@@ -1391,18 +1394,29 @@ If cities have an M2O relationship with countries via country_id:
 \`\`\`
 `,
 	},
-] satisfies Resource[]
+];
 
-// Resource tools decorator for MCP
-export class ResourceDecorator extends MCPResourceHandlerDecorator {
+// Define URI to method mapping type
+interface DocumentationResourceMethods extends ResourceMethodMap {
+  'mcp://docs/overview': () => Promise<any>;
+  'mcp://docs/tools/overview': () => Promise<any>;
+  'mcp://docs/tools/collections': () => Promise<any>;
+  // Additional resource methods can be defined here if needed
+}
+
+// Resource decorator for MCP
+export class ResourceDecorator extends MCPResourceHandlerDecorator<DocumentationResourceMethods> {
 	constructor(handler: IMCPResourceHandler) {
-		super(handler);
+		super(handler, MCP_RESOURCES);
 	}
-
-	public override getResources(): Resource[] {
-		return [
-			...super.getResources(),
-			...MCP_RESOURCES,
-		];
-	}
+	
+	// Resource methods can be added here if custom handling is needed beyond
+	// the default behavior of returning the resource content
+	
+	// Example:
+	// async 'mcp://docs/overview'() {
+	//   // Custom handling for this resource
+	//   // Will be called automatically by the base decorator class
+	//   return {...}; 
+	// }
 }

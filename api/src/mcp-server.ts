@@ -10,7 +10,7 @@ import {
 import chalk from 'chalk';
 import { useLogger } from './logger/index.js';
 import type { Accountability } from '@directus/types';
-import { createFullyDecoratedResourceHandler, createFullyDecoratedToolHandler } from './mcp/index.js';
+import { createCustomResourceHandler, createFullyDecoratedToolHandler, createCustomToolHandler } from './mcp/index.js';
 import { getSchema } from './utils/get-schema.js';
 
 const logger = useLogger();
@@ -46,20 +46,17 @@ export function setupMCPServer() {
 					subscribe: true,
 				},
 			},
-		},
+		}
 	);
 
 	server.setRequestHandler(ListResourcesRequestSchema, async () => {
 		try {
-			console.log('prout')
 			// Get admin accountability
 			const accountability = await getAdminAccountability();
 			const schema = await getSchema();
 
-			// Create a decorated handler with all tools
-			const handler = createFullyDecoratedResourceHandler(accountability, schema);
-
-			console.log('listing resources', handler.listResources());
+			// Create a decorated handler with resources configured via environment variables
+			const handler = createCustomResourceHandler(accountability, schema);
 
 			// Return the list of available resources
 			return {
@@ -72,6 +69,7 @@ export function setupMCPServer() {
 					resources: [],
 				};
 			}
+			
 			logger.error(`Error listing MCP resources: ${String(error)}`);
 			return {
 				resources: [],
@@ -80,15 +78,15 @@ export function setupMCPServer() {
 	});
 
 	server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
-		const uri = request.params.uri;
+		const { uri } = request.params;
 
 		try {
 			// Get admin accountability
 			const accountability = await getAdminAccountability();
 			const schema = await getSchema();
 
-			// Create a decorated handler
-			const handler = createFullyDecoratedResourceHandler(accountability, schema);
+			// Create a decorated handler based on environment variables
+			const handler = createCustomResourceHandler(accountability, schema);
 
 			// Use the handler to process the resource call
 			return await handler.handleResourceCall(uri);
@@ -105,6 +103,7 @@ export function setupMCPServer() {
 					isError: true,
 				};
 			}
+			
 			logger.error(`Error executing MCP resource ${uri}: ${String(error)}`);
 			return {
 				content: [
@@ -125,8 +124,8 @@ export function setupMCPServer() {
 			const accountability = await getAdminAccountability();
 			const schema = await getSchema();
 
-			// Create a decorated handler with all tools
-			const handler = createFullyDecoratedToolHandler(accountability, schema);
+			// Create a decorated handler based on environment configuration
+			const handler = createCustomToolHandler(accountability, schema);
 
 			// Return the list of available tools
 			return {
@@ -140,6 +139,7 @@ export function setupMCPServer() {
 					tools: [],
 				};
 			}
+			
 			logger.error(`Error listing MCP tools: ${String(error)}`);
 			return {
 				isError: true,
@@ -149,20 +149,19 @@ export function setupMCPServer() {
 	});
 
 	server.setRequestHandler(CallToolRequestSchema, async (request) => {
-		const toolName = request.params.name;
-		const args = request.params.arguments || {};
+		const { name: toolName, arguments: args = {} } = request.params;
 
 		try {
 			// Get admin accountability
 			const accountability = await getAdminAccountability();
 			const schema = await getSchema();
 
-			// Create a decorated handler
-			const handler = createFullyDecoratedToolHandler(accountability, schema);
+			// Create a decorated handler based on environment configuration
+			const handler = createCustomToolHandler(accountability, schema);
 
 			// Use the handler to process the tool call
 			const ret = await handler.handleToolCall(toolName, args);
-			console.log('ret', ret);
+			// console.log('ret', ret);
 			return ret;
 		} catch (error) {
 			if (error instanceof Error) {

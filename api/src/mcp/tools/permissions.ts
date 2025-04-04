@@ -1,7 +1,7 @@
 import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { PermissionsService } from '../../services/permissions.js';
 import { useLogger } from '../../logger/index.js';
-import { type IMCPToolHandler, MCPToolHandlerDecorator, MCPResponseUtils } from '../base.js';
+import { type IMCPToolHandler, MCPToolHandlerDecorator, MCPResponseUtils, type ToolMethodMap } from '../base.js';
 import type { Query } from '@directus/types';
 
 const logger = useLogger();
@@ -71,34 +71,52 @@ const PERMISSION_TOOLS: Tool[] = [
 	},
 ];
 
+// Define params types for better type safety
+type GetPermissionsParams = { 
+	filter?: any; 
+	limit?: number; 
+	offset?: number; 
+	sort?: string[] 
+};
+
+type GetPermissionParams = { 
+	id: string 
+};
+
+type CreatePermissionParams = { 
+	data: any 
+};
+
+type UpdatePermissionParams = { 
+	id: string; 
+	data: any 
+};
+
+type DeletePermissionParams = { 
+	id: string 
+};
+
+// Define the tool method map for permissions
+interface PermissionToolMethods extends ToolMethodMap {
+	get_permissions: (params: GetPermissionsParams) => Promise<any>;
+	get_permission: (params: GetPermissionParams) => Promise<any>;
+	create_permission: (params: CreatePermissionParams) => Promise<any>;
+	update_permission: (params: UpdatePermissionParams) => Promise<any>;
+	delete_permission: (params: DeletePermissionParams) => Promise<any>;
+}
+
 // Decorator for permission operations
-export class PermissionToolsDecorator extends MCPToolHandlerDecorator {
+export class PermissionToolsDecorator extends MCPToolHandlerDecorator<PermissionToolMethods> {
 	constructor(handler: IMCPToolHandler) {
-		super(handler);
+		super(handler, PERMISSION_TOOLS);
 	}
 
 	public override getTools(): Tool[] {
 		return [...PERMISSION_TOOLS, ...super.getTools()];
 	}
 
-	public override async handleToolCall(toolName: string, params: unknown): Promise<any> {
-		switch (toolName) {
-			case 'get_permissions':
-				return this.getPermissions(params as { filter?: any; limit?: number; offset?: number; sort?: string[] });
-			case 'get_permission':
-				return this.getPermission(params as { id: string });
-			case 'create_permission':
-				return this.createPermission(params as { data: any });
-			case 'update_permission':
-				return this.updatePermission(params as { id: string; data: any });
-			case 'delete_permission':
-				return this.deletePermission(params as { id: string });
-			default:
-				return super.handleToolCall(toolName, params);
-		}
-	}
-
-	private async getPermissions(params: { filter?: any; limit?: number; offset?: number; sort?: string[] } = {}) {
+	// Tool methods with the same name as the tool will be automatically called by the decorator
+	async get_permissions(params: GetPermissionsParams = {}) {
 		try {
 			const permissionsService = new PermissionsService({
 				accountability: this.wrappedHandler.getAccountability(),
@@ -119,11 +137,12 @@ export class PermissionToolsDecorator extends MCPToolHandlerDecorator {
 			} else {
 				logger.error(`Error fetching permissions: ${String(error)}`);
 			}
+			
 			return MCPResponseUtils.handleError(error, 'Error fetching permissions');
 		}
 	}
 
-	private async getPermission(params: { id: string }) {
+	async get_permission(params: GetPermissionParams) {
 		try {
 			const permissionsService = new PermissionsService({
 				accountability: this.wrappedHandler.getAccountability(),
@@ -138,11 +157,12 @@ export class PermissionToolsDecorator extends MCPToolHandlerDecorator {
 			} else {
 				logger.error(`Error fetching permission ${params.id}: ${String(error)}`);
 			}
+			
 			return MCPResponseUtils.handleError(error, `Error fetching permission ${params.id}`);
 		}
 	}
 
-	private async createPermission(params: { data: any }) {
+	async create_permission(params: CreatePermissionParams) {
 		try {
 			const permissionsService = new PermissionsService({
 				accountability: this.wrappedHandler.getAccountability(),
@@ -159,11 +179,12 @@ export class PermissionToolsDecorator extends MCPToolHandlerDecorator {
 			} else {
 				logger.error(`Error creating permission: ${String(error)}`);
 			}
+			
 			return MCPResponseUtils.handleError(error, 'Error creating permission');
 		}
 	}
 
-	private async updatePermission(params: { id: string; data: any }) {
+	async update_permission(params: UpdatePermissionParams) {
 		try {
 			const permissionsService = new PermissionsService({
 				accountability: this.wrappedHandler.getAccountability(),
@@ -180,11 +201,12 @@ export class PermissionToolsDecorator extends MCPToolHandlerDecorator {
 			} else {
 				logger.error(`Error updating permission ${params.id}: ${String(error)}`);
 			}
+			
 			return MCPResponseUtils.handleError(error, `Error updating permission ${params.id}`);
 		}
 	}
 
-	private async deletePermission(params: { id: string }) {
+	async delete_permission(params: DeletePermissionParams) {
 		try {
 			const permissionsService = new PermissionsService({
 				accountability: this.wrappedHandler.getAccountability(),
@@ -207,6 +229,7 @@ export class PermissionToolsDecorator extends MCPToolHandlerDecorator {
 			} else {
 				logger.error(`Error deleting permission ${params.id}: ${String(error)}`);
 			}
+			
 			return MCPResponseUtils.handleError(error, `Error deleting permission ${params.id}`);
 		}
 	}

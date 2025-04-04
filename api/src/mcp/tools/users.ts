@@ -1,8 +1,8 @@
-import type { Tool } from "@modelcontextprotocol/sdk/types.js";
+import type { Tool } from '@modelcontextprotocol/sdk/types.js';
 import { UsersService } from '../../services/users.js';
 import { useLogger } from '../../logger/index.js';
-import { type IMCPToolHandler, MCPToolHandlerDecorator, MCPResponseUtils } from '../base.js';
-import type { Query } from "@directus/types";
+import { type IMCPToolHandler, MCPToolHandlerDecorator, MCPResponseUtils, type ToolMethodMap } from '../base.js';
+import type { Query } from '@directus/types';
 
 const logger = useLogger();
 
@@ -92,38 +92,63 @@ const USER_TOOLS: Tool[] = [
   },
 ];
 
+// Define params types for better type safety
+type GetUsersParams = { 
+  filter?: any; 
+  limit?: number; 
+  offset?: number; 
+  sort?: string[] 
+};
+
+type GetUserParams = { 
+  id: string 
+};
+
+type CreateUserParams = { 
+  data: any 
+};
+
+type UpdateUserParams = { 
+  id: string; 
+  data: any 
+};
+
+type DeleteUserParams = { 
+  id: string 
+};
+
+type InviteUserParams = { 
+  email: string; 
+  role: string; 
+  invite_url?: string 
+};
+
+// Empty params for get_current_user
+type GetCurrentUserParams = Record<string, never>;
+
+// Define the tool method map for users
+interface UserToolMethods extends ToolMethodMap {
+  get_users: (params: GetUsersParams) => Promise<any>;
+  get_user: (params: GetUserParams) => Promise<any>;
+  create_user: (params: CreateUserParams) => Promise<any>;
+  update_user: (params: UpdateUserParams) => Promise<any>;
+  delete_user: (params: DeleteUserParams) => Promise<any>;
+  invite_user: (params: InviteUserParams) => Promise<any>;
+  get_current_user: (params: GetCurrentUserParams) => Promise<any>;
+}
+
 // Decorator for user operations
-export class UserToolsDecorator extends MCPToolHandlerDecorator {
+export class UserToolsDecorator extends MCPToolHandlerDecorator<UserToolMethods> {
   constructor(handler: IMCPToolHandler) {
-    super(handler);
+    super(handler, USER_TOOLS);
   }
 
   public override getTools(): Tool[] {
     return [...USER_TOOLS, ...super.getTools()];
   }
 
-  public override async handleToolCall(toolName: string, params: unknown): Promise<any> {
-    switch (toolName) {
-      case "get_users":
-        return this.getUsers(params as { filter?: any, limit?: number, offset?: number, sort?: string[] });
-      case "get_user":
-        return this.getUser(params as { id: string });
-      case "create_user":
-        return this.createUser(params as { data: any });
-      case "update_user":
-        return this.updateUser(params as { id: string, data: any });
-      case "delete_user":
-        return this.deleteUser(params as { id: string });
-      case "invite_user":
-        return this.inviteUser(params as { email: string, role: string, invite_url?: string });
-      case "get_current_user":
-        return this.getCurrentUser();
-      default:
-        return super.handleToolCall(toolName, params);
-    }
-  }
-
-  private async getUsers(params: { filter?: any, limit?: number, offset?: number, sort?: string[] } = {}) {
+  // Tool methods with the same name as the tool will be automatically called by the decorator
+  async get_users(params: GetUsersParams = {}) {
     try {
       const usersService = new UsersService({
         accountability: this.wrappedHandler.getAccountability(),
@@ -144,11 +169,12 @@ export class UserToolsDecorator extends MCPToolHandlerDecorator {
       } else {
         logger.error(`Error fetching users: ${String(error)}`);
       }
+      
       return MCPResponseUtils.handleError(error, "Error fetching users");
     }
   }
 
-  private async getUser(params: { id: string }) {
+  async get_user(params: GetUserParams) {
     try {
       const usersService = new UsersService({
         accountability: this.wrappedHandler.getAccountability(),
@@ -163,11 +189,12 @@ export class UserToolsDecorator extends MCPToolHandlerDecorator {
       } else {
         logger.error(`Error fetching user ${params.id}: ${String(error)}`);
       }
+      
       return MCPResponseUtils.handleError(error, `Error fetching user ${params.id}`);
     }
   }
 
-  private async createUser(params: { data: any }) {
+  async create_user(params: CreateUserParams) {
     try {
       const usersService = new UsersService({
         accountability: this.wrappedHandler.getAccountability(),
@@ -184,11 +211,12 @@ export class UserToolsDecorator extends MCPToolHandlerDecorator {
       } else {
         logger.error(`Error creating user: ${String(error)}`);
       }
+      
       return MCPResponseUtils.handleError(error, "Error creating user");
     }
   }
 
-  private async updateUser(params: { id: string, data: any }) {
+  async update_user(params: UpdateUserParams) {
     try {
       const usersService = new UsersService({
         accountability: this.wrappedHandler.getAccountability(),
@@ -205,11 +233,12 @@ export class UserToolsDecorator extends MCPToolHandlerDecorator {
       } else {
         logger.error(`Error updating user ${params.id}: ${String(error)}`);
       }
+      
       return MCPResponseUtils.handleError(error, `Error updating user ${params.id}`);
     }
   }
 
-  private async deleteUser(params: { id: string }) {
+  async delete_user(params: DeleteUserParams) {
     try {
       const usersService = new UsersService({
         accountability: this.wrappedHandler.getAccountability(),
@@ -230,18 +259,19 @@ export class UserToolsDecorator extends MCPToolHandlerDecorator {
       } else {
         logger.error(`Error deleting user ${params.id}: ${String(error)}`);
       }
+      
       return MCPResponseUtils.handleError(error, `Error deleting user ${params.id}`);
     }
   }
 
-  private async inviteUser(params: { email: string, role: string, invite_url?: string }) {
+  async invite_user(params: InviteUserParams) {
     try {
       const usersService = new UsersService({
         accountability: this.wrappedHandler.getAccountability(),
         schema: this.wrappedHandler.getSchema(),
       });
       
-      await usersService.inviteUser(params.email, params.role, params.invite_url || null);
+      await usersService.inviteUser(params.email, params.role, params.invite_url ?? null);
       
       return {
         content: [{
@@ -255,13 +285,16 @@ export class UserToolsDecorator extends MCPToolHandlerDecorator {
       } else {
         logger.error(`Error inviting user ${params.email}: ${String(error)}`);
       }
+      
       return MCPResponseUtils.handleError(error, `Error inviting user ${params.email}`);
     }
   }
 
-  private async getCurrentUser() {
+  async get_current_user(params: GetCurrentUserParams) {
     try {
-      if (!this.wrappedHandler.getAccountability() || !this.wrappedHandler.getAccountability().user) {
+      const accountability = this.wrappedHandler.getAccountability();
+      
+      if (!accountability?.user) {
         return MCPResponseUtils.createErrorResponse("No user is currently authenticated");
       }
       
@@ -269,12 +302,8 @@ export class UserToolsDecorator extends MCPToolHandlerDecorator {
         accountability: this.wrappedHandler.getAccountability(),
         schema: this.wrappedHandler.getSchema(),
       });
-
-      if(!this.wrappedHandler.getAccountability().user) {
-        return MCPResponseUtils.createErrorResponse("No user is currently authenticated");
-      }
       
-      const user = await usersService.readOne(this.wrappedHandler.getAccountability().user!);
+      const user = await usersService.readOne(accountability.user);
       return MCPResponseUtils.createSuccessResponse(user);
     } catch (error) {
       if (error instanceof Error) {
@@ -282,6 +311,7 @@ export class UserToolsDecorator extends MCPToolHandlerDecorator {
       } else {
         logger.error(`Error fetching current user: ${String(error)}`);
       }
+      
       return MCPResponseUtils.handleError(error, "Error fetching current user");
     }
   }

@@ -1,7 +1,7 @@
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import { CollectionsService } from '../../services/collections.js';
 import { useLogger } from '../../logger/index.js';
-import { type IMCPToolHandler, MCPToolHandlerDecorator, MCPResponseUtils } from '../base.js';
+import { type IMCPToolHandler, MCPToolHandlerDecorator, MCPResponseUtils, type ToolMethodMap } from '../base.js';
 
 const logger = useLogger();
 
@@ -28,10 +28,23 @@ const COLLECTION_TOOLS: Tool[] = [
   },
 ] satisfies Tool[];
 
+// Define params types for better type safety
+type ReadCollectionsParams = Record<string, never>;
+
+type GetCollectionParams = {
+  collection: string
+};
+
+// Define the tool method map for collections
+interface CollectionToolMethods extends ToolMethodMap {
+  read_collections: (params: ReadCollectionsParams) => Promise<any>;
+  get_collection: (params: GetCollectionParams) => Promise<any>;
+}
+
 // Decorator for collection operations
-export class CollectionToolsDecorator extends MCPToolHandlerDecorator {
+export class CollectionToolsDecorator extends MCPToolHandlerDecorator<CollectionToolMethods> {
   constructor(handler: IMCPToolHandler) {
-    super(handler);
+    super(handler, COLLECTION_TOOLS);
   }
 
   public override getTools(): Tool[] {
@@ -39,23 +52,8 @@ export class CollectionToolsDecorator extends MCPToolHandlerDecorator {
     return [...COLLECTION_TOOLS, ...super.getTools()];
   }
 
-  public override async handleToolCall(toolName: string, params: unknown): Promise<any> {
-    console.log("CollectionToolsDecorator.handleToolCall", toolName, params);
-    // Handle collection-specific tools
-    if (toolName === "get_collection") {
-      console.log('call getCollections');
-      return this.readCollections();
-    } else if (toolName === "read_collections") {
-      return this.getCollection(params as { collection: string });
-    }
-
-    console.log('call super.handleToolCall');
-
-    // For other tools, delegate to the wrapped handler
-    return super.handleToolCall(toolName, params);
-  }
-
-  private async readCollections() {
+  // Tool methods with the same name as the tool will be automatically called by the decorator
+  async read_collections(params: ReadCollectionsParams) {
     try {
       const collectionsService = new CollectionsService({
         accountability: this.wrappedHandler.getAccountability(),
@@ -70,11 +68,12 @@ export class CollectionToolsDecorator extends MCPToolHandlerDecorator {
       } else {
         logger.error(`Error fetching collections: ${String(error)}`);
       }
+      
       return MCPResponseUtils.handleError(error, "Error fetching collections");
     }
   }
 
-  private async getCollection(params: { collection: string }) {
+  async get_collection(params: GetCollectionParams) {
     try {
       const collectionsService = new CollectionsService({
         accountability: this.wrappedHandler.getAccountability(),
@@ -89,6 +88,7 @@ export class CollectionToolsDecorator extends MCPToolHandlerDecorator {
       } else {
         logger.error(`Error fetching collection ${params.collection}: ${String(error)}`);
       }
+      
       return MCPResponseUtils.handleError(error, `Error fetching collection ${params.collection}`);
     }
   }
