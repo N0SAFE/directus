@@ -10,7 +10,7 @@ const logger = useLogger();
 const FOLDER_TOOLS: Tool[] = [
   {
     name: "get_folders",
-    description: "Get a list of folders",
+    description: "Get a list of folders with optional filtering and pagination. For comprehensive documentation on folder management, see mcp://docs/tools/folders. For file management, see the related get_files tool. For filter syntax, see mcp://docs/filter-rules. Related to get_folder tool for retrieving individual folder details. Access is governed by permissions (see mcp://docs/access-control).",
     inputSchema: {
       type: "object",
       properties: {
@@ -23,7 +23,7 @@ const FOLDER_TOOLS: Tool[] = [
   },
   {
     name: "get_folder",
-    description: "Get details about a specific folder",
+    description: "Get details about a specific folder. For comprehensive documentation on folder management, see mcp://docs/tools/folders. Related to get_folders tool for listing multiple folders and create_folder, update_folder, and delete_folder tools for folder management. Files can be organized in folders (see get_files tool). Access is governed by permissions (see mcp://docs/access-control).",
     inputSchema: {
       type: "object",
       properties: {
@@ -34,7 +34,7 @@ const FOLDER_TOOLS: Tool[] = [
   },
   {
     name: "create_folder",
-    description: "Create a new folder",
+    description: "Create a new folder. For comprehensive documentation on folder management, see mcp://docs/tools/folders. Related to update_folder and get_folder tools. Folders can have parent-child relationships for hierarchical organization. Files can be assigned to folders (see get_files tool). Access is governed by permissions (see mcp://docs/access-control).",
     inputSchema: {
       type: "object",
       properties: {
@@ -46,7 +46,7 @@ const FOLDER_TOOLS: Tool[] = [
   },
   {
     name: "update_folder",
-    description: "Update an existing folder",
+    description: "Update an existing folder. For comprehensive documentation on folder management, see mcp://docs/tools/folders. Related to get_folder tool for checking current values and create_folder for creating new folders. Access is governed by permissions (see mcp://docs/access-control).",
     inputSchema: {
       type: "object",
       properties: {
@@ -58,7 +58,7 @@ const FOLDER_TOOLS: Tool[] = [
   },
   {
     name: "delete_folder",
-    description: "Delete a folder",
+    description: "Delete a folder. For comprehensive documentation on folder management, see mcp://docs/tools/folders. Related to get_folder tool for checking folders before deletion. When deleting parent folders, be aware of the impact on child folders and contained files. Access is governed by permissions (see mcp://docs/access-control).",
     inputSchema: {
       type: "object",
       properties: {
@@ -134,7 +134,7 @@ export class FolderToolsDecorator extends MCPToolHandlerDecorator<FolderToolMeth
       if (error instanceof Error) {
         logger.error(`Error fetching folders: ${error.message}`);
       } else {
-        logger.error(`Error fetching folders: ${JSON.stringify(error)}`);
+        logger.error(`Error fetching folders: ${String(error)}`);
       }
       
       return MCPResponseUtils.handleError(error, "Error fetching folders");
@@ -154,7 +154,7 @@ export class FolderToolsDecorator extends MCPToolHandlerDecorator<FolderToolMeth
       if (error instanceof Error) {
         logger.error(`Error fetching folder ${params.id}: ${error.message}`);
       } else {
-        logger.error(`Error fetching folder ${params.id}: ${JSON.stringify(error)}`);
+        logger.error(`Error fetching folder ${params.id}: ${String(error)}`);
       }
       
       return MCPResponseUtils.handleError(error, `Error fetching folder ${params.id}`);
@@ -179,7 +179,7 @@ export class FolderToolsDecorator extends MCPToolHandlerDecorator<FolderToolMeth
       if (error instanceof Error) {
         logger.error(`Error creating folder: ${error.message}`);
       } else {
-        logger.error(`Error creating folder: ${JSON.stringify(error)}`);
+        logger.error(`Error creating folder: ${String(error)}`);
       }
       
       return MCPResponseUtils.handleError(error, "Error creating folder");
@@ -201,7 +201,7 @@ export class FolderToolsDecorator extends MCPToolHandlerDecorator<FolderToolMeth
       if (error instanceof Error) {
         logger.error(`Error updating folder ${params.id}: ${error.message}`);
       } else {
-        logger.error(`Error updating folder ${params.id}: ${JSON.stringify(error)}`);
+        logger.error(`Error updating folder ${params.id}: ${String(error)}`);
       }
       
       return MCPResponseUtils.handleError(error, `Error updating folder ${params.id}`);
@@ -227,7 +227,7 @@ export class FolderToolsDecorator extends MCPToolHandlerDecorator<FolderToolMeth
       if (error instanceof Error) {
         logger.error(`Error deleting folder ${params.id}: ${error.message}`);
       } else {
-        logger.error(`Error deleting folder ${params.id}: ${JSON.stringify(error)}`); 
+        logger.error(`Error deleting folder ${params.id}: ${String(error)}`);
       }
       
       return MCPResponseUtils.handleError(error, `Error deleting folder ${params.id}`);

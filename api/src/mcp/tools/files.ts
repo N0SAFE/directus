@@ -10,7 +10,7 @@ const logger = useLogger();
 const FILE_TOOLS: Tool[] = [
 	{
 		name: 'get_files',
-		description: 'Get a list of files in the Directus instance',
+		description: 'Get a list of files in the Directus instance with optional filtering and pagination. For comprehensive documentation on file management, see mcp://docs/tools/files. For folder management, see the related get_folders tool. For filter syntax, see mcp://docs/filter-rules. Related to get_file tool for retrieving individual file details. Access is governed by permissions (see mcp://docs/access-control).',
 		inputSchema: {
 			type: 'object',
 			properties: {
@@ -22,7 +22,7 @@ const FILE_TOOLS: Tool[] = [
 	},
 	{
 		name: 'get_file',
-		description: 'Get details about a specific file',
+		description: 'Get details about a specific file. For comprehensive documentation on file management, see mcp://docs/tools/files. Related to get_files tool for listing multiple files. Files can be organized using folders (see get_folders, create_folder tools). Access is governed by permissions (see mcp://docs/access-control).',
 		inputSchema: {
 			type: 'object',
 			properties: {

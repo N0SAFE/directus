@@ -2,6 +2,69 @@ import { MCPResourceHandlerDecorator, type IMCPResourceHandler, type Resource } 
 
 // User, role, and permission resources
 const userRoleResources: Resource[] = [
+	// Users overview
+	{
+		uri: 'mcp://docs/user-role',
+		mimeType: 'text/markdown',
+		name: 'User and Role Management',
+		description: 'Documentation for user and role management concepts',
+		text: `# User and Role Management
+
+## Overview
+User and role management is a core part of Directus's access control system. This document describes the concepts, structures, and workflows related to managing users and roles.
+
+## Related Resources
+- See [Access Control](mcp://docs/access-control) for more information about permissions
+- See [Authentication](mcp://docs/authentication) for information about login procedures
+- See [Mail](mcp://docs/mail) for email-related functionality like user invitations
+
+## Available Tools
+- User tools: See [Users Tools](mcp://docs/tools/users) for user management operations
+- Role tools: See [Roles Tools](mcp://docs/tools/roles) for role management operations
+- Permission tools: See [Permissions Tools](mcp://docs/tools/permissions) for setting up access controls
+
+## User Management
+Users are individuals who can access the system. Each user has an account with credentials and can be assigned one or more roles that define their access permissions.
+
+### User Properties
+- **id**: Unique identifier
+- **email**: Email address (required)
+- **password**: Hashed password
+- **first_name**: User's first name
+- **last_name**: User's last name
+- **avatar**: User's profile picture
+- **role**: Primary role assignment (reference to a role)
+- **roles**: Additional role assignments (for multiple roles)
+- **status**: Account status (active, invited, suspended, etc.)
+- **last_access**: Timestamp of last login
+- **last_page**: Last page visited in the app
+
+### User Workflows
+- **Registration**: Creating new user accounts
+- **Invitation**: Inviting users by email
+- **Authentication**: Login process
+- **Profile Management**: Updating user details
+- **Password Reset**: Handling forgotten passwords
+- **Role Assignment**: Managing user roles
+
+## Role Management
+Roles define sets of permissions that can be assigned to users. Each role has a collection of permission rules that determine what actions users with that role can perform.
+
+### Role Properties
+- **id**: Unique identifier
+- **name**: Display name of the role
+- **description**: Optional description
+- **admin_access**: Whether the role has admin privileges
+- **app_access**: Whether the role can access the app
+- **enforce_tfa**: Whether two-factor authentication is required
+
+### Role Workflows
+- **Creating Roles**: Setting up different permission groups
+- **Assigning Permissions**: Defining what each role can do
+- **Assigning Users**: Connecting users to roles
+`,
+	},
+
 	// Users tools
 	{
 		uri: 'mcp://docs/tools/users',
@@ -9,6 +72,17 @@ const userRoleResources: Resource[] = [
 		name: 'Users Tools',
 		description: 'Documentation for user management tools',
 		text: `# User Management Tools
+
+These tools allow you to manage user accounts within Directus.
+
+**Related Concepts:**
+- See [User and Role Management](mcp://docs/user-role) for conceptual information
+- See [Access Control](mcp://docs/access-control) for permission concepts
+- See [Authentication](mcp://docs/authentication) for login procedures
+
+**Related Tools:**
+- [Role Tools](mcp://docs/tools/roles) for managing user roles
+- [Permission Tools](mcp://docs/tools/permissions) for setting user permissions
 
 ## get_users
 Get a list of users with optional filtering and pagination.

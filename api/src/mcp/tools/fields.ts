@@ -9,7 +9,7 @@ const logger = useLogger();
 const FIELD_TOOLS: Tool[] = [
   {
     name: "get_fields",
-    description: "Get all fields for a collection",
+    description: "Get all fields for a collection. For comprehensive documentation on field types and structures, see mcp://docs/data-model/fields. For relationship fields, see mcp://docs/data-model/relationships. For usage examples, see mcp://docs/tools/fields. Related to get_collection tool for viewing the collection schema and read_items tool for retrieving actual field values. Access is governed by permissions (see mcp://docs/access-control).",
     inputSchema: {
       type: "object",
       properties: {
@@ -20,7 +20,7 @@ const FIELD_TOOLS: Tool[] = [
   },
   {
     name: "get_field",
-    description: "Get a specific field from a collection",
+    description: "Get a specific field from a collection. For detailed documentation on field types and configurations, see mcp://docs/data-model/fields. For relationship field details, see mcp://docs/data-model/relationships. For usage examples, see mcp://docs/tools/fields. Related to get_fields tool for viewing all fields in a collection and read_items for accessing field values in items. Access is governed by permissions (see mcp://docs/access-control).",
     inputSchema: {
       type: "object",
       properties: {
@@ -32,7 +32,7 @@ const FIELD_TOOLS: Tool[] = [
   },
   {
     name: "create_field",
-    description: "Create a new field in a collection",
+    description: "Create a new field in a collection. For detailed information on field types and configurations, see mcp://docs/data-model/fields. For creating relationship fields, see mcp://docs/data-model/relationships. For usage examples, see mcp://docs/tools/fields. Related to the update_field and delete_field tools for field management. Access is governed by permissions (see mcp://docs/access-control).",
     inputSchema: {
       type: "object",
       properties: {
@@ -44,7 +44,7 @@ const FIELD_TOOLS: Tool[] = [
   },
   {
     name: "update_field",
-    description: "Update an existing field in a collection",
+    description: "Update an existing field in a collection. For detailed information on updatable field properties, see mcp://docs/data-model/fields. For relationship field management, see mcp://docs/data-model/relationships. For usage examples, see mcp://docs/tools/fields. Related to the get_field tool to view current field configuration and create_field tool for creating new fields. Access is governed by permissions (see mcp://docs/access-control).",
     inputSchema: {
       type: "object",
       properties: {
@@ -57,7 +57,7 @@ const FIELD_TOOLS: Tool[] = [
   },
   {
     name: "delete_field",
-    description: "Delete a field from a collection",
+    description: "Delete a field from a collection. Use with caution when deleting relationship fields - see mcp://docs/data-model/relationships for understanding relationship impacts. For usage examples, see mcp://docs/tools/fields. Related to the update_field tool for modifying fields rather than deleting them. Access is governed by permissions (see mcp://docs/access-control).",
     inputSchema: {
       type: "object",
       properties: {
@@ -67,7 +67,7 @@ const FIELD_TOOLS: Tool[] = [
       required: ["collection", "field"],
     },
   },
-];
+] satisfies Tool[];
 
 // Define params types for better type safety
 type GetFieldsParams = {

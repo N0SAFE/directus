@@ -10,7 +10,7 @@ const logger = useLogger();
 const PERMISSION_TOOLS: Tool[] = [
 	{
 		name: 'get_permissions',
-		description: 'Get a list of permissions',
+		description: 'Get a list of permissions with optional filtering and pagination. For comprehensive documentation on permission management, see mcp://docs/tools/permissions. For understanding the access control system, see mcp://docs/access-control. Related to get_roles and get_users tools. Filter syntax follows standard query parameters (see mcp://docs/query-parameters and mcp://docs/filter-rules).',
 		inputSchema: {
 			type: 'object',
 			properties: {
@@ -23,7 +23,7 @@ const PERMISSION_TOOLS: Tool[] = [
 	},
 	{
 		name: 'get_permission',
-		description: 'Get details about a specific permission',
+		description: 'Get details about a specific permission. For comprehensive documentation on permission management, see mcp://docs/tools/permissions. For understanding the access control system, see mcp://docs/access-control. Related to get_permissions tool for listing multiple permissions and create_permission, update_permission, and delete_permission tools for permission management.',
 		inputSchema: {
 			type: 'object',
 			properties: {
@@ -34,7 +34,7 @@ const PERMISSION_TOOLS: Tool[] = [
 	},
 	{
 		name: 'create_permission',
-		description: 'Create a new permission',
+		description: 'Create a new permission. For comprehensive documentation on permission management, see mcp://docs/tools/permissions. For understanding the access control system, see mcp://docs/access-control. Related to get_roles tool for role management and read_collections tool for collection information. Permissions control access to collections and their items (see read_items tool).',
 		inputSchema: {
 			type: 'object',
 			properties: {
@@ -48,7 +48,7 @@ const PERMISSION_TOOLS: Tool[] = [
 	},
 	{
 		name: 'update_permission',
-		description: 'Update an existing permission',
+		description: 'Update an existing permission. For comprehensive documentation on permission management, see mcp://docs/tools/permissions. For understanding the access control system, see mcp://docs/access-control. Related to get_permission tool for checking current values and create_permission for creating new permissions.',
 		inputSchema: {
 			type: 'object',
 			properties: {
@@ -60,7 +60,7 @@ const PERMISSION_TOOLS: Tool[] = [
 	},
 	{
 		name: 'delete_permission',
-		description: 'Delete a permission',
+		description: 'Delete a permission. For comprehensive documentation on permission management, see mcp://docs/tools/permissions. For understanding the access control system, see mcp://docs/access-control. Related to get_permission tool for checking permissions before deletion. Removing permissions may affect users with associated roles.',
 		inputSchema: {
 			type: 'object',
 			properties: {

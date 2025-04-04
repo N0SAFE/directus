@@ -10,11 +10,11 @@ const logger = useLogger();
 const ROLE_TOOLS: Tool[] = [
 	{
 		name: 'get_roles',
-		description: 'Get a list of all roles',
+		description: 'Get a list of all roles. For more information about roles, see mcp://docs/tools/roles and mcp://docs/access-control. Related to get_permissions and get_users tools.',
 		inputSchema: {
 			type: 'object',
 			properties: {
-				filter: { type: 'object', description: 'Filter criteria for roles' },
+				filter: { type: 'object', description: 'Filter criteria for roles. See mcp://docs/filter-rules for filter syntax.' },
 				limit: { type: 'number', description: 'Limit the number of roles returned' },
 				offset: { type: 'number', description: 'Offset for pagination' },
 				sort: { type: 'array', description: 'Sort criteria', items: { type: 'string' } },
@@ -23,7 +23,7 @@ const ROLE_TOOLS: Tool[] = [
 	},
 	{
 		name: 'get_role',
-		description: 'Get details about a specific role',
+		description: 'Get details about a specific role. For more information about roles, see mcp://docs/tools/roles and mcp://docs/access-control. Related to get_user and get_permission tools.',
 		inputSchema: {
 			type: 'object',
 			properties: {
@@ -34,7 +34,7 @@ const ROLE_TOOLS: Tool[] = [
 	},
 	{
 		name: 'create_role',
-		description: 'Create a new role',
+		description: 'Create a new role. For more information about roles, see mcp://docs/tools/roles and mcp://docs/access-control. Related to create_permission tool for configuring role permissions.',
 		inputSchema: {
 			type: 'object',
 			properties: {
@@ -48,7 +48,7 @@ const ROLE_TOOLS: Tool[] = [
 	},
 	{
 		name: 'update_role',
-		description: 'Update an existing role',
+		description: 'Update an existing role. For more information about roles, see mcp://docs/tools/roles and mcp://docs/access-control. Related to update_permission tool for modifying role permissions.',
 		inputSchema: {
 			type: 'object',
 			properties: {
@@ -60,7 +60,7 @@ const ROLE_TOOLS: Tool[] = [
 	},
 	{
 		name: 'delete_role',
-		description: 'Delete a role',
+		description: 'Delete a role. For more information about roles, see mcp://docs/tools/roles and mcp://docs/access-control. Related to delete_permission tool. Note that this will remove all associated permissions.',
 		inputSchema: {
 			type: 'object',
 			properties: {

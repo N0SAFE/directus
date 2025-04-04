@@ -10,7 +10,7 @@ const logger = useLogger();
 const ITEM_TOOLS: Tool[] = [
   {
     name: "read_items",
-    description: "Read items from a collection with optional filtering",
+    description: "Read items from a collection with optional filtering, sorting, and pagination. For query parameter documentation, see mcp://docs/query-parameters. For filter syntax, see mcp://docs/filter-rules. For usage examples, see mcp://docs/tools/items. Related to read_item tool for getting individual items and get_fields tool for field information. Access is governed by permissions (see mcp://docs/access-control).",
     inputSchema: {
       type: "object",
       properties: {
@@ -25,7 +25,7 @@ const ITEM_TOOLS: Tool[] = [
   },
   {
     name: "read_item",
-    description: "Read a single item from a collection by ID",
+    description: "Read a single item from a collection by ID. For usage examples, see mcp://docs/tools/items. Related to read_items tool for retrieving multiple items, update_item for modifying items, and delete_item for removing items. Access is governed by permissions (see mcp://docs/access-control).",
     inputSchema: {
       type: "object",
       properties: {
@@ -37,7 +37,7 @@ const ITEM_TOOLS: Tool[] = [
   },
   {
     name: "create_item",
-    description: "Create a new item in a collection",
+    description: "Create a new item in a collection. For managing item relationships, see mcp://docs/data-model/relationships. For usage examples, see mcp://docs/tools/items. Related to update_item and read_item tools. For field requirements, reference the get_fields tool. Access is governed by permissions (see mcp://docs/access-control).",
     inputSchema: {
       type: "object",
       properties: {
@@ -49,7 +49,7 @@ const ITEM_TOOLS: Tool[] = [
   },
   {
     name: "update_item",
-    description: "Update an existing item in a collection",
+    description: "Update an existing item in a collection. For managing relationship updates, see mcp://docs/data-model/relationships. For usage examples, see mcp://docs/tools/items. Related to read_item for retrieving current values and create_item for creating new items. Access is governed by permissions (see mcp://docs/access-control).",
     inputSchema: {
       type: "object",
       properties: {
@@ -62,7 +62,7 @@ const ITEM_TOOLS: Tool[] = [
   },
   {
     name: "delete_item",
-    description: "Delete an item from a collection",
+    description: "Delete an item from a collection. For understanding how deletion affects relationships, see mcp://docs/data-model/relationships. For usage examples, see mcp://docs/tools/items. Related to read_item for checking items before deletion and update_item for modifying instead of deleting. Access is governed by permissions (see mcp://docs/access-control).",
     inputSchema: {
       type: "object",
       properties: {

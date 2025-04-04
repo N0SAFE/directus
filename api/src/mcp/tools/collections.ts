@@ -9,7 +9,7 @@ const logger = useLogger();
 const COLLECTION_TOOLS: Tool[] = [
   {
     name: "read_collections",
-    description: "Get a list of all collections in the Directus instance. See related resources at mcp://docs/data-model/collections for understanding collection concepts and mcp://docs/tools/collections for detailed tool usage. Related to the get_collection tool for retrieving specific collections.",
+    description: "Get a list of all collections in the Directus instance. For detailed documentation on collections, see mcp://docs/data-model/collections. For usage examples, see mcp://docs/tools/collections. Related to get_fields tool for viewing fields within collections and read_items tool for accessing collection data. Access is governed by permissions (see mcp://docs/access-control).",
     inputSchema: {
       type: "object",
       properties: {},
@@ -17,7 +17,7 @@ const COLLECTION_TOOLS: Tool[] = [
   },
   {
     name: "get_collection",
-    description: "Get details about a specific collection. See related resources at mcp://docs/data-model/collections for understanding collection concepts and mcp://docs/tools/collections for detailed tool usage. Related to the read_collections tool for listing all collections and get_fields tool for viewing collection fields.",
+    description: "Get details about a specific collection. For comprehensive documentation on collection structure, see mcp://docs/data-model/collections. For usage examples, see mcp://docs/tools/collections. Related to read_collections tool for listing all collections, get_fields tool for viewing fields within this collection, and read_items for accessing items in this collection. Access is governed by permissions (see mcp://docs/access-control).",
     inputSchema: {
       type: "object",
       properties: {

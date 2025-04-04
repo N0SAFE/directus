@@ -10,7 +10,11 @@ const queryResources: Resource[] = [
 		description: 'Documentation for Directus query parameters',
 		text: `# Directus Query Parameters
 
-Most Directus API endpoints can use global query parameters to customize the data that is returned. These parameters are available in the read_items tool and other tools that support querying.
+Most Directus API endpoints can use global query parameters to customize the data that is returned. These parameters are available in the \`read_items\` tool and other tools that support querying.
+
+*Related tools:* [read_items](mcp://docs/tools/items), [get_files](mcp://docs/tools/files), [get_folders](mcp://docs/tools/folders)
+
+*Related resources:* [Filter Rules](mcp://docs/filter-rules), [Access Control](mcp://docs/access-control)
 
 ## Fields
 Specify which fields are returned. This parameter also supports dot notation to request nested relational fields, and wildcards (*) to include all fields at a specific depth.
@@ -63,7 +67,7 @@ Specify which items are returned based on filter rules.
 }
 \`\`\`
 
-See the detailed Filter Rules documentation for more information on available operators and advanced filtering.
+See the detailed [Filter Rules](mcp://docs/filter-rules) documentation for more information on available operators and advanced filtering.
 
 ## Search
 Search on all string and text type fields within a collection. It's a convenient way to search without complex filters, though less optimized.
@@ -190,6 +194,10 @@ Functions accept a field and return a modified value. They can be used in field 
 		text: `# Directus Filter Rules
 
 Filters are used throughout Directus to query specific data. They have a consistent syntax and a rich set of operators.
+
+*Related tools:* [read_items](mcp://docs/tools/items), [get_files](mcp://docs/tools/files), [get_folders](mcp://docs/tools/folders), [get_users](mcp://docs/tools/users), [get_permissions](mcp://docs/tools/permissions), [get_roles](mcp://docs/tools/roles)
+
+*Related resources:* [Query Parameters](mcp://docs/query-parameters), [Access Control](mcp://docs/access-control)
 
 ## Available Operators
 

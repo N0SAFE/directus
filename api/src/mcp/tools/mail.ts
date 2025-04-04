@@ -10,6 +10,8 @@ const MAIL_TOOLS: Tool[] = [
 	{
 		name: 'send_email',
 		description: 'Send an email through the system',
+		documentation: 'mcp://docs/tools/mail',
+		relatedTools: ['send_email_with_template'],
 		inputSchema: {
 			type: 'object',
 			properties: {
@@ -48,6 +50,8 @@ const MAIL_TOOLS: Tool[] = [
 	{
 		name: 'send_email_with_template',
 		description: 'Send an email using a template',
+		documentation: 'mcp://docs/tools/mail',
+		relatedTools: ['send_email'],
 		inputSchema: {
 			type: 'object',
 			properties: {
